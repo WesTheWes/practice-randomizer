@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Random Scale Generator</title>
+  <script src="https://unpkg.com/vue@next"></script>
+  <style>
+    .keys .key.highlighted {
+      background: #028ae9;
+      transition: all .07s ease;
+    }
+
+    .keys {
+      display: block;
+      width: 100%;
+      height: 350px;
+      max-width: 880px;
+      position: relative;
+      margin: 40px auto 0;
+    }
+
+    .key {
+        background: #FFF;
+        border: 2px solid black;
+        border-left: none;
+        position: relative;
+        border-radius: .3rem;
+        transition: all .07s ease;
+        display: block;
+        box-sizing: border-box;
+        z-index:-2;
+    }
+    
+    .key:first-child:not(.sharp) {
+        border-left: 2px solid black;
+    }
+
+    .key:not(.sharp) {
+        float: left;
+        width: calc(100%/14);
+        height: 100%;
+    }
+
+    .key.sharp {
+        border-left: 2px solid black;
+        position: absolute;
+        width: calc(300%/70);
+        height: 60%;
+        background: #000;
+        top: 0;
+        z-index: 3;
+    }
+
+    .noteIndex{
+        width:100%;
+        text-align: center;
+        position: absolute;
+        bottom: 10px;
+    }
+
+    .get-random-scale {
+        margin: 0 auto;
+        font-family: sans-serif;
+        width: 100%;
+        display: flex;
+        justify-content: space-evenly;
+        text-align: center;
+        align-items: center;
+        max-width: 880px;
+    }
+
+    .get-random-scale button {
+        margin: 1em;
+        font-size: 1.5em;
+        background: #ff5b3e;
+        padding: 0.5em;
+        color: #fff;
+        border: 0.3em solid #ff5b3e;
+    }
+
+    .get-random-scale button:hover {
+        border: 0.3em solid #ff6c4f;
+        background: #fff;
+        color: #ff5b3e;
+    }
+
+    .get-random-scale button:active {
+        background: #b11b00;
+        color: #fff;
+        border: 0.3em solid #792414;
+    }
+
+    .get-random-scale button:focus{
+        outline:none;
+    }
+
+    .mode, .scale, .get-scale {
+        flex: 1 1 30%;
+    }
+
+    .scale-name, .mode-name {
+        font-size: 1.75em;
+    }
+
+    .scale-title, .mode-title {
+        border-bottom: 2px solid black;
+        margin-bottom: 5px;
+        padding-bottom: 5px;
+    }
+
+    .key[data-note="Db_1"] {
+      left: 5%;
+    }
+
+    .key[data-note="Eb_1"] {
+      left: 12%;
+    }
+
+    .key[data-note="Gb_1"]  {
+      left: 26.5%;
+    }
+
+    .key[data-note="Ab_1"] {
+      left: 33.5%;
+    }
+
+    .key[data-note="Bb_1"] {
+      left: 40.5%;    
+    }
+
+    .key[data-note="Db_2"] {
+      left: 55%;    
+    }
+
+    .key[data-note="Eb_2"] {
+      left: 62.3%;    
+    }
+
+    .key[data-note="Gb_2"]  {
+      left: 76.5%;
+    }
+
+    .key[data-note="Ab_2"] {
+      left: 83.6%;
+    }
+
+    .key[data-note="Bb_2"] {
+      left: 90.7%;    
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+      <scale-demonstration></scale-demonstration>
+  </div>
+
+  <script>
+    const app = Vue.createApp({})
+    app.component('scale-demonstration', {
+        data() {
+            return {
+                currentScale: {
+                    ScaleName: '',
+                    ModeName: '', 
+                    Notes: [],
+                },
+                keys: [
+                    {note: 'C_1', sharp: false},
+                    {note: 'Db_1', sharp: true},
+                    {note: 'D_1', sharp: false},
+                    {note: 'Eb_1', sharp: true},
+                    {note: 'E_1', sharp: false},
+                    {note: 'F_1', sharp: false},
+                    {note: 'Gb_1', sharp: true},
+                    {note: 'G_1', sharp: false},
+                    {note: 'Ab_1', sharp: true},
+                    {note: 'A_1', sharp: false},
+                    {note: 'Bb_1', sharp: true},
+                    {note: 'B_1', sharp: false},
+                    {note: 'C_2', sharp: false},
+                    {note: 'Db_2', sharp: true},
+                    {note: 'D_2', sharp: false},
+                    {note: 'Eb_2', sharp: true},
+                    {note: 'E_2', sharp: false},
+                    {note: 'F_2', sharp: false},
+                    {note: 'Gb_2', sharp: true},
+                    {note: 'G_2', sharp: false},
+                    {note: 'Ab_2', sharp: true},
+                    {note: 'A_2', sharp: false},
+                    {note: 'Bb_2', sharp: true},
+                    {note: 'B_2', sharp: false},
+                ],
+                keyValues: {'C': 0, 'Db': 1, 'D': 2, 'Eb': 3, 'E': 4, 'F': 5, 'Gb': 6, 'G': 7, 'Ab': 8, 'A': 9, 'Bb' : 10, 'B': 11}
+            }
+        },
+        methods:{
+            getScale() {
+                fetch('http://localhost:3000/random_scale')
+                    .then(response => response.json())
+                    .then(data => {
+                            this.currentScale.ScaleName = data.ScaleName
+                            this.currentScale.ModeName = data.ModeName
+                            this.currentScale.Notes = data.Notes
+                        })
+            },
+            getNoteInfo(note) {
+                let noteName
+                let octaveNumber = 1
+                const firstNoteValue = this.keyValues[this.currentScale.Notes[0]]
+                for(const index of this.currentScale.Notes.keys()){
+                    noteName = this.currentScale.Notes[index]
+                    
+                    if(octaveNumber === 1 && index !== 0 && this.keyValues[noteName] <= firstNoteValue){
+                        octaveNumber += 1
+                    }
+                    numberedNoteName = noteName + "_" + octaveNumber
+                    if(note === numberedNoteName){
+                        return {
+                            inScale: true,
+                            index: index
+                        }
+                    }
+                }
+                return {
+                    inScale: false,
+                    index: -1
+                }
+            },
+            getBackgroundColor(noteIndex){
+                if(noteIndex === -1){
+                    return
+                }
+                const colors = {
+                    0 : '#eb4034',
+                    1 : '#eb5c34',
+                    2 : '#eb6534',
+                    3 : '#eb8c34',
+                    4 : '#eb9934',
+                    5 : '#eba534',
+                    6 : '#ebb434',
+                    7 : '#ebc334',
+                    8 : '#ebd934',
+                    9 : '#ebeb34',
+                    10: '#cdeb34',
+                    11: '#b7eb34',
+                    12: '#9feb34',
+                }
+                return {'background' : colors[noteIndex]}
+            }
+        },
+        template: `
+            <div class="keys">
+                <div v-for="key in keys"
+                    class="key" 
+                    :class="{
+                        'sharp': key.sharp,
+                        'highlighted': this.getNoteInfo(key.note).inScale
+                    }"
+                    v-bind:style="this.getBackgroundColor(this.getNoteInfo(key.note).index)"
+                    v-bind:data-note="key.note"
+                    v-bind:data-index="this.getNoteInfo(key.note).index"
+                >
+                    <div v-if="this.getNoteInfo(key.note).index !== -1" class="noteIndex">{{ this.getNoteInfo(key.note).index+1 }}</div>
+                </div>
+            </div>
+            <div class="get-random-scale">
+                <div class="scale" v-if="this.currentScale.ScaleName !== ''">
+                    <div class="scale-title">Scale</div>
+                    <div class="scale-name">{{this.currentScale.ScaleName}}</div>
+                </div>
+                <button class="get-scale" v-on:click="getScale">Get Random Scale</button>
+                <div class="mode" v-if="this.currentScale.ModeName !== ''">
+                    <div class="mode-title">Mode</div>
+                    <div class="mode-name">{{this.currentScale.ModeName}}</div>
+                </div>
+            </div>
+        `
+     })
+     app.mount('#app')
+
+  </script>
+</body>
+</html>
