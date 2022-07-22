@@ -52,14 +52,14 @@ func getModeNames() map[string][]string {
 
 func getRandomScale() string {
 	scales := getScales()
-	rand.Seed(time.Now().Unix())
+	rand.Seed(time.Now().UnixNano())
 	return scales[rand.Intn(len(scales))]
 }
 
 func getRandomModeFromScale(scale string) (int, string) {
 	modeNames := getModeNames()
 	modes := modeNames[scale]
-	rand.Seed(time.Now().Unix())
+	rand.Seed(time.Now().UnixNano())
 	modeIndex := rand.Intn(len(modes))
 	return modeIndex, modes[modeIndex]
 }
@@ -89,7 +89,7 @@ func getNotesOfScale(scaleStructure []int, key int, modeIndex int) []string {
 
 func getRandomKey() key {
 	keys := getNotes()
-	rand.Seed(time.Now().Unix())
+	rand.Seed(time.Now().UnixNano())
 	keyIndex := rand.Intn(len(keys))
 	return key{
 		Index: keyIndex,
